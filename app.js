@@ -1,21 +1,22 @@
 const express = require('express');
 const UserRoutes = require('./routes/UserRoutes');
-const mongoose = require('./config/db')
+const connectDB = require('./config/db');
+require('dotenv').config();
 
 const app = express();
 
 app.use(express.json());
 //calling connection
-// mongoose();
+connectDB();
 
 app.use('/auth',UserRoutes);
 
 app.get('/',(req, res)=> {
-    res.send("register route called")
-    console.log("register route called");
+    res.send("Home route called");
+    console.log("Home route called");
 });
 
-const PORT = process.env.PORT || 3004;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT,()=> {
     console.log(`Sever running on http://localhost:${PORT}`);
 })
