@@ -47,4 +47,9 @@ const LoginUSer = async (req, res) => {
     } 
 };
 
-module.exports = { RegisterUser, LoginUSer };
+const GetUsers = async (req, res) => {
+    res.status(200).send('all users route would be call');
+    console.log("User Route Called");
+}
+
+module.exports = { RegisterUser, LoginUSer, GetUsers };
