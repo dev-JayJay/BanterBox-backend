@@ -1,5 +1,7 @@
 // const express = require('express');
 const user = require('../modules/UserModules');
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 const RegisterUser = async (req, res) => { 
     const { firstname, lastname, username, email, password } = req.body
@@ -39,8 +41,11 @@ const LoginUSer = async (req, res) => {
             console.log("Entered password", password);
             return  res.status(400).send("Incorrect password");
         }
-        // pass jwt token and perform authorization
-        res.status(200).json({ message: "Login Successfull"});
+        
+        // Generate jwt token
+        const token = jwt.sign({ userId: logUser.id, email: logUser.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        console.log(token);
+        res.status(200).json({ token, message: "Login Successfull"});
     } catch (error) {
         res.status(400).send("Login Error");
         console.log("Login Failed",error);
@@ -48,8 +53,15 @@ const LoginUSer = async (req, res) => {
 };
 
 const GetUsers = async (req, res) => {
-    res.status(200).send('all users route would be call');
-    console.log("User Route Called");
+    try {
+        const allUsers = await  user.find();
+        const allUsersNumber = allUsers.length;
+        res.status(200).json({message: 'all users route would be call', allUsersNumber, allUsers});
+        console.log("User Route Called");
+    } catch (err) {
+        res.status(400).send("getting users failed");
+        console.log("getting users failed",err);
+    }
 }
 
 module.exports = { RegisterUser, LoginUSer, GetUsers };
