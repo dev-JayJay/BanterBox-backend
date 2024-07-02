@@ -1,11 +1,16 @@
 // Protected route
 const express = require('express');
 const router = express.Router()
-const authenticateToken = require('../middleware/jwt');
+const AuthorizationToken = require('../middleware/jwt');
 const { GetUsers, LogOutUser } = require('../controllers/UserController');
+const { SendMessage, GetMessage } = require('../controllers/MessageController');
 
+// protected route to authorize and log out users
+router.get('/users', AuthorizationToken, GetUsers);
+router.post('/logout', AuthorizationToken, LogOutUser);
 
-router.get('/users', authenticateToken, GetUsers);
-router.post('/logout', authenticateToken, LogOutUser);
+// protected message route
+router.post('/send', AuthorizationToken, SendMessage);
+router.get('/send', AuthorizationToken, GetMessage);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const authenticateToken = (req, res, next) => {
+const AuthorizationToken = (req, res, next) => {
     // Get token from header
     const token = req.header('Authorization')?.split(' ')[1];
 
@@ -11,6 +11,9 @@ const authenticateToken = (req, res, next) => {
     }
 
     try {
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET environment variable is not set');
+        }
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET); // Replace with your JWT secret key
         req.user = decoded;
@@ -21,4 +24,4 @@ const authenticateToken = (req, res, next) => {
     }
 };
 
-module.exports = authenticateToken;
+module.exports = AuthorizationToken;
