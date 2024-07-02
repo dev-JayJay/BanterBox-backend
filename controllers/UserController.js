@@ -52,6 +52,19 @@ const LoginUSer = async (req, res) => {
     } 
 };
 
+const LogOutUser = async (req, res) => {
+    const { token } = req.header;
+    try {
+        await localStorage.removeItem(token);
+        res.status(200).json({
+            message : 'LogOut Successfull',
+        })
+    } catch (err) {
+        res.status(400).send("Loging out failed");
+        console.log("Loging out failed",err);
+    }
+}
+
 const GetUsers = async (req, res) => {
     try {
         const allUsers = await  user.find();
@@ -64,4 +77,4 @@ const GetUsers = async (req, res) => {
     }
 }
 
-module.exports = { RegisterUser, LoginUSer, GetUsers };
+module.exports = { RegisterUser, LoginUSer, LogOutUser, GetUsers };

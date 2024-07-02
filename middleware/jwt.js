@@ -12,7 +12,7 @@ const authenticateToken = (req, res, next) => {
 
     try {
         // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_PHASE); // Replace with your JWT secret key
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Replace with your JWT secret key
         req.user = decoded;
         next();
     } catch (error) {
