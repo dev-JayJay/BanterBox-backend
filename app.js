@@ -2,7 +2,6 @@ const express = require('express');
 const UserRoutes = require('./routes/UserRoutes');
 const protected = require('./routes/protected');
 const connectDB = require('./config/db');
-const authenticateToken = require('./middleware/jwt');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -15,7 +14,8 @@ app.use(cors());
 connectDB();
 
 app.use('/auth',UserRoutes);
-app.use(authenticateToken, protected);
+// protected routes
+app.use(protected);
 
 // app.get('/',(req, res)=> {
 //     res.send("Home route called");
