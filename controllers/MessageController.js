@@ -1,17 +1,19 @@
-const message = require('../modules/MessageModule');
+const Message = require('../modules/MessageModule');
 
 const SendMessage = async (req, res) => {
     const { message, senderId, receiverId } = req.body;
     try {
-        if (!senderId || !receiverId || !messageText) {
+
+        if (!senderId || !receiverId || !message) {
             return res.status(400).json({ message: 'Sender ID, Receiver ID, and Message Text are required' });
         }
 
-        const newMessage = message({message, senderId, receiverId});
-        
+        const newMessage = Message({message, senderId, receiverId});
         await newMessage.save();
+        console.log('message sent', message);
+
     } catch (error) {
-        res.status(400).send('Error sending message', error);
+        res.status(500).json({ message: 'Error sending message', error: error.message });
         console.log('Error sending message', error);
     }
 }
@@ -25,8 +27,10 @@ const GetMessage = async (req, res) => {
         }
 
         const messages = await Message.find({
-            senderId,
-            receiverId,
+            $or: [
+                { senderId, receiverId },
+                { senderId: receiverId, receiverId: senderId }
+            ]
         }).sort({ timestamp: 1 });
 
         res.status(200).json({ messages });
