@@ -10,7 +10,7 @@ router.get('/users', AuthorizationToken, GetUsers);
 router.post('/logout', AuthorizationToken, LogOutUser);
 
 // protected message route
-router.post('/send', AuthorizationToken, SendMessage);
-router.get('/send', AuthorizationToken, GetMessage);
+router.post('/sendMessage', AuthorizationToken, SendMessage);
+router.get('/getMessage', AuthorizationToken, GetMessage);
 
 module.exports = router;
