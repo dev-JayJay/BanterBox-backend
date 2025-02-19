@@ -1,7 +1,10 @@
 import { request, response } from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import { responseMessage } from "../utils/response.util.js";
+import { sendMail } from "../utils/sendMail.util.js";
+import { accountCreatedMessage } from "../constants/mail.constants.js";
 
 export const registrationController = async (request, response) => {
   const { fullName, userName, email, password, profile_image, cover_image } =
@@ -20,6 +23,11 @@ export const registrationController = async (request, response) => {
     return responseMessage(response, "Password is required", null, 400);
   }
 
+  const isEmailPresent = await User.findOne({ email });
+  if (isEmailPresent) {
+    return responseMessage(response, "This email is been use by another user", null, 400);
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = User({
@@ -30,8 +38,23 @@ export const registrationController = async (request, response) => {
       profile_image,
       cover_image,
     });
+
     await newUser.save();
-    responseMessage(response, "User registration successful", newUser, 201);
+
+    const payload = { user_id: newUser._id };
+    const mySecretKey = process.env.JWT_SECRET_KEY;
+    const token = jwt.sign(payload, mySecretKey, { expiresIn: "1h" });
+
+    const message = accountCreatedMessage(newUser.fullName);
+    await sendMail(email, "Account created Successfully", message, response);
+
+
+    responseMessage(
+      response,
+      "User registration successful",
+      { token, newUser },
+      201
+    );
   } catch (error) {
     responseMessage(response, "User registration faild", error, 500);
     console.log(`error registering a user ${error}`);
@@ -60,7 +83,17 @@ export const loginController = async (request, response) => {
     }
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (isPasswordCorrect) {
-      return responseMessage(response, "Login is successfuly", user, 200);
+      const payload = {
+        user_id: user._id,
+      };
+      const mySecretKey = process.env.JWT_SECRET_KEY;
+      const token = jwt.sign(payload, mySecretKey, { expiresIn: "1h" });
+      return responseMessage(
+        response,
+        "Login is successfuly",
+        { token, user },
+        200
+      );
     } else {
       return responseMessage(
         response,
