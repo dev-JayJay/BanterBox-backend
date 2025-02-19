@@ -1,5 +1,6 @@
 import { request, response } from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import { responseMessage } from "../utils/response.util.js";
 
@@ -30,8 +31,18 @@ export const registrationController = async (request, response) => {
       profile_image,
       cover_image,
     });
+
+    const payload = { user_id: newUser._id, };
+    const mySecretKey = process.env.JWT_SECRET_KEY;
+    const token = jwt.sign(payload, mySecretKey, { expiresIn: "1h" });
+
     await newUser.save();
-    responseMessage(response, "User registration successful", newUser, 201);
+    responseMessage(
+      response,
+      "User registration successful",
+      { token, newUser },
+      201
+    );
   } catch (error) {
     responseMessage(response, "User registration faild", error, 500);
     console.log(`error registering a user ${error}`);
@@ -60,7 +71,17 @@ export const loginController = async (request, response) => {
     }
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (isPasswordCorrect) {
-      return responseMessage(response, "Login is successfuly", user, 200);
+      const payload = {
+        user_id: user._id,
+      };
+      const mySecretKey = process.env.JWT_SECRET_KEY;
+      const token = jwt.sign(payload, mySecretKey, { expiresIn: "1h" });
+      return responseMessage(
+        response,
+        "Login is successfuly",
+        { token, user },
+        200
+      );
     } else {
       return responseMessage(
         response,
