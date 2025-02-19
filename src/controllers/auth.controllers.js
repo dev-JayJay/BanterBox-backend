@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import { responseMessage } from "../utils/response.util.js";
+import { sendMail } from "../utils/sendMail.util.js";
+import { accountCreatedMessage } from "../constants/mail.constants.js";
 
 export const registrationController = async (request, response) => {
   const { fullName, userName, email, password, profile_image, cover_image } =
@@ -21,6 +23,11 @@ export const registrationController = async (request, response) => {
     return responseMessage(response, "Password is required", null, 400);
   }
 
+  const isEmailPresent = await User.findOne({ email });
+  if (isEmailPresent) {
+    return responseMessage(response, "This email is been use by another user", null, 400);
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = User({
@@ -32,11 +39,16 @@ export const registrationController = async (request, response) => {
       cover_image,
     });
 
-    const payload = { user_id: newUser._id, };
+    await newUser.save();
+
+    const payload = { user_id: newUser._id };
     const mySecretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign(payload, mySecretKey, { expiresIn: "1h" });
 
-    await newUser.save();
+    const message = accountCreatedMessage(newUser.fullName);
+    await sendMail(email, "Account created Successfully", message, response);
+
+
     responseMessage(
       response,
       "User registration successful",

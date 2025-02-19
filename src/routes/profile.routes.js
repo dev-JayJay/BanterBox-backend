@@ -1,9 +1,8 @@
 import express from 'express';
+import { getProfileControllers } from '../controllers/profile.controllers.js';
+import { verifyJwtToken } from '../middleware/verifyJwtToken.js';
 const profileRoutes = express.Router();
 
-profileRoutes.get('/:id', (req, res) => {
-    const { id } = req.params;
-    res.send(`checking the profile of user ${id}`);
-})
+profileRoutes.get('/', verifyJwtToken, getProfileControllers)
 
 export default profileRoutes
