@@ -1,5 +1,5 @@
 import express from 'express';
-import { getProfileControllers, updateUserProfileController } from '../controllers/profile.controllers.js';
+import { getProfileControllers, updateUserProfileController } from '../controllers/profile.controller.js';
 import { verifyJwtToken } from '../middleware/verifyJwtToken.js';
 const profileRoutes = express.Router();
 
