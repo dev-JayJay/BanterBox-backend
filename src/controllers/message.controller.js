@@ -1,4 +1,5 @@
 import { request, response } from "express";
+import mongoose from "mongoose";
 import Message from "../models/message.model.js";
 import { responseMessage } from "../utils/response.util.js";
 
@@ -118,4 +119,54 @@ export const updateMessageController = async (request, response) => {
   } catch (error) {
     return responseMessage(response, "Error Updating this message", error, 500);
   }
+};
+
+export const deleteMessageController = async (request, response) => {
+    const { message_id } = request.query; 
+
+    if (!message_id) {
+        return responseMessage(
+            response,
+            "Message id to delete is required",  
+            null,
+            400
+        );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(message_id)) {
+        return responseMessage(
+            response,
+            "Invalid message id format", 
+            null,
+            400
+        );
+    }
+
+    try {
+        const message = await Message.findByIdAndDelete(message_id);
+
+        if (!message) {
+            return responseMessage(
+                response,
+                "Message not found",  
+                null,
+                404
+            );
+        }
+
+        return responseMessage(
+            response,
+            "Message deleted successfully",
+            message, 
+            200
+        );
+    } catch (error) {
+        console.error("Error deleting message:", error);  
+        return responseMessage(
+            response,
+            "Error deleting this message",  
+            error, 
+            500
+        );
+    }
 };
